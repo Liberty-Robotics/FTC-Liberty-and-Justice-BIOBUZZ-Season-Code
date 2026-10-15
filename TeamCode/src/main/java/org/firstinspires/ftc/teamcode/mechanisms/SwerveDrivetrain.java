@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -11,8 +13,10 @@ public class SwerveDrivetrain {
     private static final double WHEEL_BASE = 12.0;   // Distance between front and back wheels
     private static final double R = Math.hypot(WHEEL_BASE, TRACK_WIDTH);
 
-    private DcMotor[] driveMotors = new DcMotor[4];
-    private Servo[] steeringServos = new Servo[4];
+    private final DcMotor[] driveMotors = new DcMotor[4];
+    private final Servo[] steeringServos = new Servo[4];
+
+    private IMU imu;
 
 
     public void init(HardwareMap hwMap) {
@@ -21,27 +25,42 @@ public class SwerveDrivetrain {
        driveMotors[2] = hwMap.get(DcMotor.class, "backLeftDrive");
        driveMotors[3] = hwMap.get(DcMotor.class, "backRightDrive");
 
+        for (int i = 0; i < 4; i++) {
+            driveMotors[i].setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
        steeringServos[0] = hwMap.get(Servo.class, "frontLeftSteer");
        steeringServos[1] = hwMap.get(Servo.class, "frontRightSteer");
        steeringServos[2] = hwMap.get(Servo.class, "backLeftSteer");
        steeringServos[3] = hwMap.get(Servo.class, "backRightSteer");
+
+        IMU.Parameters myIMUparameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP, // TODO Change to Logo Direction
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD // TODO Change to USB Direction
+                )
+        );
+
+        imu = hwMap.get(IMU.class, "imu");
+        imu.initialize(myIMUparameters);
+
+
     }
 
-    public void drive(Gamepad gamepad, double headingRadians) {
+    public void drive(Gamepad gamepad) {
+        double headingRadians = imu.getRobotYawPitchRollAngles().getYaw();
         double joystickX = gamepad.left_stick_x;
         double joystickY = -gamepad.left_stick_y;
         double turn = gamepad.right_stick_x;
 
-        // FIELD CENTRIC CONVERSION
-        // Translates joystick inputs relative to the field instead of the front of the bot
+        // Field Centric Conversion
         double cosHeading = Math.cos(headingRadians);
         double sinHeading = Math.sin(headingRadians);
 
         double fwd = joystickY * cosHeading + joystickX * sinHeading;
         double strafe = -joystickY * sinHeading + joystickX * cosHeading;
 
-        // SWERVE KINEMATICS MATH
-        // Intermediate vector math variables
+        // Swerve Drivetrain Math
         double a = strafe - turn * (WHEEL_BASE / R);
         double b = strafe + turn * (WHEEL_BASE / R);
         double c = fwd - turn * (TRACK_WIDTH / R);
@@ -53,7 +72,7 @@ public class SwerveDrivetrain {
         double blSpeed = Math.hypot(a, p(c)); // Back Left
         double brSpeed = Math.hypot(a, p(d)); // Back Right
 
-        // Calculate Target Angles for each module (in Radians, -PI to +PI)
+        // Calculate Target Angles for each module
         double flAngle = Math.atan2(b, c);
         double frAngle = Math.atan2(b, d);
         double blAngle = Math.atan2(a, c);
@@ -70,6 +89,7 @@ public class SwerveDrivetrain {
 
         // TODO: Output these target speeds and angles to your modules!
         // Example: Set motor powers to speeds, and PID-control your servos to match target angles.
+
     }
 
     // Quick helper method to safely handle internal naming math parameters
