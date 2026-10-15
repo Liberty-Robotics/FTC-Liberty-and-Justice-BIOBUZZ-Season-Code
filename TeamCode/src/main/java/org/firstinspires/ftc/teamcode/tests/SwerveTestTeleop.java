@@ -13,15 +13,15 @@ public class SwerveTestTeleop extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        // Pass the hardware context
+
         drivetrain.init(hardwareMap);
 
         waitForStart();
 
+
+
         while (opModeIsActive()) {
-            // Basic Robot-Centric configuration (Heading = 0)
-            // Once you get a gyro running, replace 0 with your imu.getRobotYawPitchRollAngles().getYaw()
-            drivetrain.drive(gamepad1, 0.0); // TODO get headingRadians
+            drivetrain.drive(gamepad1);
 
             idle();
         }
