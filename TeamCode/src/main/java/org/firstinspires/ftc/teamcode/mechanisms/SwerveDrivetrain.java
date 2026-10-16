@@ -92,10 +92,10 @@ public class SwerveDrivetrain {
         driveModule backLeft = new driveModule(driveMotors[2], steeringServos[2]);
         driveModule backRight = new driveModule(driveMotors[3], steeringServos[3]);
 
-        frontLeft.setInputs(flSpeed, flAngle);
-        frontRight.setInputs(frSpeed, frAngle);
-        backLeft.setInputs(blSpeed, blAngle);
-        backRight.setInputs(brSpeed, brAngle);
+        frontLeft.update(flSpeed, flAngle);
+        frontRight.update(frSpeed, frAngle);
+        backLeft.update(blSpeed, blAngle);
+        backRight.update(brSpeed, brAngle);
 
     }
 
