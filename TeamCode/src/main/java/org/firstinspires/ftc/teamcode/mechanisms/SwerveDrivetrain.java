@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class SwerveDrivetrain {
     private static final double TRACK_WIDTH = 12.0;  // TODO Update track width
@@ -16,23 +19,28 @@ public class SwerveDrivetrain {
     private final DcMotorEx[] driveMotors = new DcMotorEx[4];
     private final Servo[] steeringServos = new Servo[4];
 
+
     private IMU imu;
 
 
     public void init(HardwareMap hwMap) {
        driveMotors[0] = hwMap.get(DcMotorEx.class, "frontLeftDrive");
        driveMotors[1] = hwMap.get(DcMotorEx.class, "frontRightDrive");
-       driveMotors[2] = hwMap.get(DcMotorEx.class, "backLeftDrive");
-       driveMotors[3] = hwMap.get(DcMotorEx.class, "backRightDrive");
+//       driveMotors[2] = hwMap.get(DcMotorEx.class, "backLeftDrive");
+//       driveMotors[3] = hwMap.get(DcMotorEx.class, "backRightDrive");
 
-       for (int i = 0; i < 4; i++) {
-           driveMotors[i].setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       }
+        driveMotors[2] = null;
+        driveMotors[3] = null;
+
 
        steeringServos[0] = hwMap.get(Servo.class, "frontLeftSteer");
-       steeringServos[1] = hwMap.get(Servo.class, "frontRightSteer");
-       steeringServos[2] = hwMap.get(Servo.class, "backLeftSteer");
-       steeringServos[3] = hwMap.get(Servo.class, "backRightSteer");
+//       steeringServos[1] = hwMap.get(Servo.class, "frontRightSteer");
+//       steeringServos[2] = hwMap.get(Servo.class, "backLeftSteer");
+//       steeringServos[3] = hwMap.get(Servo.class, "backRightSteer");
+
+        steeringServos[1] = null;
+        steeringServos[2] = null;
+        steeringServos[3] = null;
 
         IMU.Parameters IMUparameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
@@ -43,15 +51,26 @@ public class SwerveDrivetrain {
 
         imu = hwMap.get(IMU.class, "imu");
         imu.initialize(IMUparameters);
+        imu.resetYaw();
 
 
     }
 
-    public void drive(Gamepad gamepad) {
-        double headingRadians = imu.getRobotYawPitchRollAngles().getYaw();
+    public void drive(Gamepad gamepad, Telemetry telemetry) {
+        // Reset heading when options or back button is pressed
+        if (gamepad.options || gamepad.back) {
+            imu.resetYaw();
+        }
+
+        double headingRadians = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double joystickX = gamepad.left_stick_x;
         double joystickY = -gamepad.left_stick_y;
         double turn = gamepad.right_stick_x;
+
+        telemetry.addData("Heading", headingRadians);
+        telemetry.addData("Joystick X", joystickX);
+        telemetry.addData("Joystick Y", joystickY);
+        telemetry.addData("Turn", turn);
 
         // Field Centric Conversion
         double cosHeading = Math.cos(headingRadians);
@@ -73,10 +92,10 @@ public class SwerveDrivetrain {
         double brSpeed = Math.hypot(a, p(d)); // Back Right
 
         // Calculate Target Angles for each module
-        double flAngle = Math.atan2(b, c);
-        double frAngle = Math.atan2(b, d);
-        double blAngle = Math.atan2(a, c);
-        double brAngle = Math.atan2(a, d);
+        double flAngle = Math.toDegrees(Math.atan2(b, c));
+        double frAngle = Math.toDegrees(Math.atan2(b, d));
+        double blAngle = Math.toDegrees(Math.atan2(a, c));
+        double brAngle = Math.toDegrees(Math.atan2(a, d));
 
         // Normalize speeds so they never try to exceed 1.0 power scale
         double maxSpeed = Math.max(Math.max(flSpeed, frSpeed), Math.max(blSpeed, brSpeed));
@@ -86,18 +105,18 @@ public class SwerveDrivetrain {
             blSpeed /= maxSpeed;
             brSpeed /= maxSpeed;
         }
+//      TODO change this back later
 
         driveModule frontLeft = new driveModule(driveMotors[0], steeringServos[0]);
         driveModule frontRight = new driveModule(driveMotors[1], steeringServos[1]);
-        driveModule backLeft = new driveModule(driveMotors[2], steeringServos[2]);
-        driveModule backRight = new driveModule(driveMotors[3], steeringServos[3]);
 
-        frontLeft.update(flSpeed, flAngle);
+        frontLeft.displayTelemetry(telemetry, flAngle, flSpeed, steeringServos[0], "Front Left");
+        frontRight.displayTelemetry(telemetry, frAngle, frSpeed, steeringServos[1], "Front Right");
+
         frontRight.update(frSpeed, frAngle);
-        backLeft.update(blSpeed, blAngle);
-        backRight.update(brSpeed, brAngle);
-
+        frontLeft.update(flSpeed, flAngle);
     }
+
 
     // Quick helper method to safely handle internal naming math parameters
     private double p(double value) { return value; }

@@ -15,13 +15,17 @@ public class SwerveTestTeleop extends LinearOpMode {
     public void runOpMode() {
 
         swerve.init(hardwareMap);
+        telemetry.addLine("swerve initialization was a success!");
+        telemetry.update();
 
         waitForStart();
 
 
 
         while (opModeIsActive()) {
-            swerve.drive(gamepad1);
+            telemetry.addLine("swerve drive has started");
+            swerve.drive(gamepad1, telemetry);
+            telemetry.update();
 
             idle();
         }
