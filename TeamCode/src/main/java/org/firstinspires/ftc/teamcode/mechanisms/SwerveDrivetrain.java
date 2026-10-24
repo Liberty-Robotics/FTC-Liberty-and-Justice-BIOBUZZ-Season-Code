@@ -12,8 +12,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class SwerveDrivetrain {
-    private static final double TRACK_WIDTH = 12.0;  // TODO Update track width
-    private static final double WHEEL_BASE = 12.0;   // TODO Update wheel base
+    private static final double TRACK_WIDTH = 14.6;
+    private static final double WHEEL_BASE = 11.125;
     private static final double R = Math.hypot(WHEEL_BASE, TRACK_WIDTH);
 
     private final DcMotorEx[] driveMotors = new DcMotorEx[4];
@@ -26,21 +26,14 @@ public class SwerveDrivetrain {
     public void init(HardwareMap hwMap) {
        driveMotors[0] = hwMap.get(DcMotorEx.class, "frontLeftDrive");
        driveMotors[1] = hwMap.get(DcMotorEx.class, "frontRightDrive");
-//       driveMotors[2] = hwMap.get(DcMotorEx.class, "backLeftDrive");
-//       driveMotors[3] = hwMap.get(DcMotorEx.class, "backRightDrive");
-
-        driveMotors[2] = null;
-        driveMotors[3] = null;
+       driveMotors[2] = hwMap.get(DcMotorEx.class, "backLeftDrive");
+       driveMotors[3] = hwMap.get(DcMotorEx.class, "backRightDrive");
 
 
        steeringServos[0] = hwMap.get(Servo.class, "frontLeftSteer");
-//       steeringServos[1] = hwMap.get(Servo.class, "frontRightSteer");
-//       steeringServos[2] = hwMap.get(Servo.class, "backLeftSteer");
-//       steeringServos[3] = hwMap.get(Servo.class, "backRightSteer");
-
-        steeringServos[1] = null;
-        steeringServos[2] = null;
-        steeringServos[3] = null;
+       steeringServos[1] = hwMap.get(Servo.class, "frontRightSteer");
+       steeringServos[2] = hwMap.get(Servo.class, "backLeftSteer");
+       steeringServos[3] = hwMap.get(Servo.class, "backRightSteer");
 
         IMU.Parameters IMUparameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
@@ -105,16 +98,22 @@ public class SwerveDrivetrain {
             blSpeed /= maxSpeed;
             brSpeed /= maxSpeed;
         }
-//      TODO change this back later
 
         driveModule frontLeft = new driveModule(driveMotors[0], steeringServos[0]);
         driveModule frontRight = new driveModule(driveMotors[1], steeringServos[1]);
+        driveModule backLeft = new driveModule(driveMotors[2], steeringServos[2]);
+        driveModule backRight = new driveModule(driveMotors[3], steeringServos[3]);
+
 
         frontLeft.displayTelemetry(telemetry, flAngle, flSpeed, steeringServos[0], "Front Left");
         frontRight.displayTelemetry(telemetry, frAngle, frSpeed, steeringServos[1], "Front Right");
+        backLeft.displayTelemetry(telemetry, blAngle, blSpeed, steeringServos[3], "Back Left");
+        backRight.displayTelemetry(telemetry, brAngle, brSpeed, steeringServos[4], "Back Right");
 
-        frontRight.update(frSpeed, frAngle);
         frontLeft.update(flSpeed, flAngle);
+        frontRight.update(frSpeed, frAngle);
+        backLeft.update(blSpeed, blAngle);
+        backRight.update(brSpeed, brAngle);
     }
 
 

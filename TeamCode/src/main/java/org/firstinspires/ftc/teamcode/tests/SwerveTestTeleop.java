@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.mechanisms.SwerveDrivetrain;
 
@@ -11,8 +12,12 @@ public class SwerveTestTeleop extends LinearOpMode {
 
     SwerveDrivetrain swerve = new SwerveDrivetrain();
 
+    private DcMotor motor = null;
+
     @Override
     public void runOpMode() {
+
+        motor  = hardwareMap.get(DcMotor.class, "motor");
 
         swerve.init(hardwareMap);
         telemetry.addLine("swerve initialization was a success!");
@@ -20,11 +25,16 @@ public class SwerveTestTeleop extends LinearOpMode {
 
         waitForStart();
 
-
-
         while (opModeIsActive()) {
             telemetry.addLine("swerve drive has started");
             swerve.drive(gamepad1, telemetry);
+
+            if (gamepad1.dpad_right) {
+                motor.setPower(1);
+            } else {
+                motor.setPower(0);
+            }
+
             telemetry.update();
 
             idle();
