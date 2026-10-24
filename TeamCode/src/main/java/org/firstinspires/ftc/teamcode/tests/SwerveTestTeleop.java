@@ -13,24 +13,31 @@ public class SwerveTestTeleop extends LinearOpMode {
     SwerveDrivetrain swerve = new SwerveDrivetrain();
     DcMotor intake = null;
 
+    private DcMotor motor = null;
+
     @Override
     public void runOpMode() {
 
-        intake = hardwareMap.get(DcMotor.class, "intake");
+        motor  = hardwareMap.get(DcMotor.class, "motor");
+
         swerve.init(hardwareMap);
+        telemetry.addLine("swerve initialization was a success!");
+        telemetry.update();
 
         waitForStart();
 
-
-
         while (opModeIsActive()) {
-            swerve.drive(gamepad1);
-            boolean dpad_right = gamepad1.dpad_right;
-            if (dpad_right == true) {
-                intake.setPower(0.8);
+            telemetry.addLine("swerve drive has started");
+            swerve.drive(gamepad1, telemetry);
+
+            if (gamepad1.dpad_right) {
+                motor.setPower(1);
             } else {
-                intake.setPower(0);
+                motor.setPower(0);
             }
+
+            telemetry.update();
+
             idle();
         }
     }
