@@ -11,14 +11,17 @@ import org.firstinspires.ftc.teamcode.mechanisms.SwerveDrivetrain;
 public class SwerveTestTeleop extends LinearOpMode {
 
     SwerveDrivetrain swerve = new SwerveDrivetrain();
-    DcMotor intake = null;
 
-    private DcMotor motor = null;
+    private DcMotor intake = null;
 
     @Override
     public void runOpMode() {
 
-        motor  = hardwareMap.get(DcMotor.class, "motor");
+        try {
+            intake = hardwareMap.get(DcMotor.class, "intake");
+        } catch (Exception e) {
+            intake = null;
+        }
 
         swerve.init(hardwareMap);
         telemetry.addLine("swerve initialization was a success!");
@@ -30,10 +33,12 @@ public class SwerveTestTeleop extends LinearOpMode {
             telemetry.addLine("swerve drive has started");
             swerve.drive(gamepad1, telemetry);
 
-            if (gamepad1.dpad_right) {
-                motor.setPower(1);
-            } else {
-                motor.setPower(0);
+            if (intake != null) {
+                if (gamepad1.dpad_right) {
+                    intake.setPower(1);
+                } else {
+                    intake.setPower(0);
+                }
             }
 
             telemetry.update();

@@ -37,8 +37,8 @@ public class SwerveDrivetrain {
 
         IMU.Parameters IMUparameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP, // TODO Change to Logo Direction
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD // TODO Change to USB Direction
+                        RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
+                        RevHubOrientationOnRobot.UsbFacingDirection.UP
                 )
         );
 
@@ -61,9 +61,7 @@ public class SwerveDrivetrain {
         double turn = gamepad.right_stick_x;
 
         telemetry.addData("Heading", headingRadians);
-        telemetry.addData("Joystick X", joystickX);
-        telemetry.addData("Joystick Y", joystickY);
-        telemetry.addData("Turn", turn);
+        telemetry.addLine();
 
         // Field Centric Conversion
         double cosHeading = Math.cos(headingRadians);
@@ -104,16 +102,27 @@ public class SwerveDrivetrain {
         driveModule backLeft = new driveModule(driveMotors[2], steeringServos[2]);
         driveModule backRight = new driveModule(driveMotors[3], steeringServos[3]);
 
+//        This code runs the function in the driveModule class where the motor and servo position are printed in the terminal
 
         frontLeft.displayTelemetry(telemetry, flAngle, flSpeed, steeringServos[0], "Front Left");
+        telemetry.addLine();
         frontRight.displayTelemetry(telemetry, frAngle, frSpeed, steeringServos[1], "Front Right");
-        backLeft.displayTelemetry(telemetry, blAngle, blSpeed, steeringServos[3], "Back Left");
-        backRight.displayTelemetry(telemetry, brAngle, brSpeed, steeringServos[4], "Back Right");
+        telemetry.addLine();
+        backLeft.displayTelemetry(telemetry, blAngle, blSpeed, steeringServos[2], "Back Left");
+        telemetry.addLine();
+        backRight.displayTelemetry(telemetry, brAngle, brSpeed, steeringServos[3], "Back Right");
+        telemetry.addLine();
 
         frontLeft.update(flSpeed, flAngle);
         frontRight.update(frSpeed, frAngle);
         backLeft.update(blSpeed, blAngle);
         backRight.update(brSpeed, brAngle);
+    }
+
+    public void setServoPosition(double servoPos) {
+        for (Servo servo : steeringServos) {
+            servo.setPosition(servoPos);
+        }
     }
 
 
