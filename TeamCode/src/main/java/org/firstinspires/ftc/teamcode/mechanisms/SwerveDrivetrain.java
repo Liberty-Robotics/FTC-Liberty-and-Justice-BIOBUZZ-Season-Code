@@ -37,8 +37,8 @@ public class SwerveDrivetrain {
 
         IMU.Parameters IMUparameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP, // TODO Change to Logo Direction
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD // TODO Change to USB Direction
+                        RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
+                        RevHubOrientationOnRobot.UsbFacingDirection.UP
                 )
         );
 
